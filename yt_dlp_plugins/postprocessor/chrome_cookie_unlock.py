@@ -16,12 +16,16 @@ yt_dlp.cookies._open_database_copy = unlock_chrome
 # Adapted from https://gist.github.com/csm10495/e89e660ffee0030e8ef410b793ad6a7e
 # By Charles Machalow under the MIT License
 
-from ctypes import windll, byref, create_unicode_buffer, pointer
-from ctypes.wintypes import DWORD, WCHAR
+from ctypes import windll, byref, create_unicode_buffer, pointer, WINFUNCTYPE
+from ctypes.wintypes import DWORD, WCHAR, UINT
 
 ERROR_SUCCESS = 0
 ERROR_MORE_DATA  = 234
 RmForceShutdown = 1
+
+@WINFUNCTYPE(None, UINT)
+def callback(percent_complete: UINT) -> None:
+    pass
 
 rstrtmgr = windll.LoadLibrary("Rstrtmgr")
 
@@ -51,7 +55,7 @@ def unlock_cookies(cookies_path):
             raise RuntimeError(f"RmGetList returned non-successful result: {result}")
 
         if proc_info_needed.value:
-            result = DWORD(rstrtmgr.RmShutdown(session_handle, RmForceShutdown)).value
+            result = DWORD(rstrtmgr.RmShutdown(session_handle, RmForceShutdown, callback)).value
 
             if result != ERROR_SUCCESS:
                 raise RuntimeError(f"RmShutdown returned non-successful result: {result}")
