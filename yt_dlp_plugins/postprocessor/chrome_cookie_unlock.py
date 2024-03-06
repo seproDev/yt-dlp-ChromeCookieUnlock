@@ -1,3 +1,5 @@
+import sys
+
 import yt_dlp.cookies
 
 original_func = yt_dlp.cookies._open_database_copy
@@ -6,7 +8,7 @@ def unlock_chrome(database_path, tmpdir):
     try:
         return original_func(database_path, tmpdir)
     except PermissionError:
-        print('Attempting to unlock cookies')
+        print('Attempting to unlock cookies', file=sys.stderr)
         unlock_cookies(database_path)
         return original_func(database_path, tmpdir)
 
